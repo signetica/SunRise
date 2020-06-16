@@ -1,0 +1,670 @@
+<html>
+<head>
+<title>Sun rise - set</title>
+<meta name=keywords content=astronomy,sun,rise,set,javascript>
+<link rel="SHORTCUT ICON" HREF="/~srschmitt/favicon.ico">
+<link rel="stylesheet" type="text/css" href="standard.css">
+<script language=JavaScript SRC=feedback.js></script>
+<script language=JavaScript SRC=commjnc1.js></script>
+
+<script language=JavaScript>
+<!-- hide
+
+var PI = Math.PI;
+var DR = PI/180;
+var K1 = 15*DR*1.0027379
+
+var Sunrise = false;
+var Sunset  = false;
+
+var Rise_time = [0, 0];
+var Set_time  = [0, 0];
+var Rise_az = 0.0;
+var Set_az  = 0.0;
+
+var Sky = [0.0, 0.0];
+var RAn = [0.0, 0.0, 0.0];
+var Dec = [0.0, 0.0, 0.0];
+var VHz = [0.0, 0.0, 0.0];
+
+var Now;
+var Cookie_name = "script_sun_rise_set";
+
+// initialize date
+function initdate()
+{
+    Now = new Date();
+    showdate(Now);
+    load_latlon();
+}
+
+// display the date
+function showdate(d)
+{
+    calc.month.value = d.getMonth() + 1;
+    calc.day.value   = d.getDate();
+    calc.year.value  = d.getFullYear();
+}
+
+function load_latlon()
+{
+    var latlon = getCookie(Cookie_name);
+
+    if (!latlon) return;                       // no cookie
+       
+    s = latlon.substr( 0, 8);
+    lat_deg = parseInt(s);
+
+    s = latlon.substr( 8, 8);
+    lat_min = parseInt(s);
+
+    s = latlon.substr(16, 8);
+    lon_deg = parseInt(s);
+
+    s = latlon.substr(24, 8);
+    lon_min = parseInt(s);
+
+    if (lat_deg < 0)                           // south
+    {
+        calc.south.checked = true;
+        calc.north.checked = false;
+        lat_deg = -lat_deg;
+    }
+    else
+    {
+        calc.south.checked = false;
+        calc.north.checked = true;
+    }
+ 
+    if (lon_deg < 0)                           // west
+    {
+        calc.west.checked = true;
+        calc.east.checked = false;
+        lon_deg = -lon_deg;
+    }
+    else
+    {
+        calc.west.checked = false;
+        calc.east.checked = true;
+    }
+ 
+    calc.lat_degrees.value = lat_deg;
+    calc.lat_minutes.value = lat_min;
+    calc.lon_degrees.value = lon_deg;
+    calc.lon_minutes.value = lon_min;
+}
+
+// save to cookie after checking for valid data
+function save_latlon()
+{
+    var lat_deg = parseInt(calc.lat_degrees.value, 10);
+    var lat_min = parseInt(calc.lat_minutes.value, 10);
+    var lon_deg = parseInt(calc.lon_degrees.value, 10);
+    var lon_min = parseInt(calc.lon_minutes.value, 10);
+
+    if (isNaN(lat_deg)||(lat_deg < 0)||(lat_deg >=  90)||
+        isNaN(lat_min)||(lat_min < 0)||(lat_min >=  60)||
+        isNaN(lon_deg)||(lon_deg < 0)||(lon_deg >= 180)||
+        isNaN(lon_min)||(lon_min < 0)||(lon_min >=  60))
+    {
+        return;
+    }
+
+    if (calc.south.checked == true) lat_deg = -lat_deg;
+    if (calc.west.checked  == true) lon_deg = -lon_deg;  
+    var latlon = cintstr(lat_deg, 8) + cintstr(lat_min, 8) 
+               + cintstr(lon_deg, 8) + cintstr(lon_min, 8);
+
+    setCookie(Cookie_name, latlon, 365);
+}
+
+// test case
+function test()
+{
+    // Boston, MA US  42°21' N, 71°04' W
+
+    // Latitude        
+    calc.lat_degrees.value = "42";
+    calc.lat_minutes.value = "21";
+
+    // Longitude       
+    calc.lon_degrees.value = "71";
+    calc.lon_minutes.value = "04";
+}
+
+// compute ...
+function compute()
+{
+    var lat_degrees = parseInt(calc.lat_degrees.value, 10);
+    var lat_minutes = parseInt(calc.lat_minutes.value, 10);
+    var lon_degrees = parseInt(calc.lon_degrees.value, 10);
+    var lon_minutes = parseInt(calc.lon_minutes.value, 10);
+
+    var year  = parseInt(calc.year.value, 10);
+    var month = parseInt(calc.month.value, 10) - 1;
+    var day   = parseInt(calc.day.value, 10);
+
+    if (isNaN(lat_degrees)||(lat_degrees < 0)||(lat_degrees >=  90)||
+        isNaN(lat_minutes)||(lat_minutes < 0)||(lat_minutes >=  60)||
+        isNaN(lon_degrees)||(lon_degrees < 0)||(lon_degrees >= 180)||
+        isNaN(lon_minutes)||(lon_minutes < 0)||(lon_minutes >=  60))
+    {
+        window.alert("Invalid input!");
+        return;
+    }
+
+    var lat = lat_degrees + lat_minutes/60.0;
+    var lon = lon_degrees + lon_minutes/60.0;
+    if (calc.south.checked == true) lat = -lat;
+    if (calc.west.checked  == true) lon = -lon;
+
+    var year  = parseInt(calc.year.value, 10);
+    var month = parseInt(calc.month.value, 10) - 1;
+    var day   = parseInt(calc.day.value, 10);
+
+    Now = new Date(year, month, day, 0, 0, 0);
+
+    calc.sunrise.value = "";
+    calc.sunset.value  = "";
+    riseset(lat, lon);
+    save_latlon();
+}
+
+// change N/S flags
+function north_lat()
+{
+    if (calc.south.checked == true) 
+        calc.south.checked = false;
+}
+
+// change N/S flags
+function south_lat()
+{
+    if (calc.north.checked == true) 
+        calc.north.checked = false;
+}
+
+// change E/W flags
+function east_lon()
+{
+    if (calc.west.checked == true) 
+        calc.west.checked = false;
+}
+
+// change E/W flags
+function west_lon()
+{
+    if (calc.east.checked == true) 
+        calc.east.checked = false;
+}
+
+// calculate sunrise and sunset times
+function riseset( lat, lon )
+{
+    var k;
+    var zone = Math.round(Now.getTimezoneOffset()/60);
+    var jd = julian_day() - 2451545;           // Julian day relative to Jan 1.5, 2000
+    
+    if ((sgn(zone) == sgn(lon))&&(zone != 0))
+        window.alert("WARNING: time zone and longitude are incompatible!");
+    
+    lon = lon/360;
+    var tz  = zone/24;
+    var ct  = jd/36525 + 1;                    // centuries since 1900.0
+    var t0 = lst(lon, jd, tz);                 // local sidereal time
+
+    jd = jd + tz;                              // get sun position at start of day
+    sun(jd, ct);
+    var ra0  = Sky[0];
+    var dec0 = Sky[1];
+
+    jd = jd + 1;                               // get sun position at end of day
+    sun(jd, ct);
+    var ra1  = Sky[0];
+    var dec1 = Sky[1];
+
+    if (ra1 < ra0)                             // make continuous 
+        ra1 = ra1 + 2*PI;
+
+    Sunrise = false;                           // initialize
+    Sunset  = false;
+    RAn[0]   = ra0;
+    Dec[0]  = dec0;
+    
+    for (k = 0; k < 24; k++)                   // check each hour of this day
+    {
+        ph = (k + 1)/24;
+        
+        RAn[2] = ra0  + (k + 1)*(ra1  - ra0)/24;
+        Dec[2] = dec0 + (k + 1)*(dec1 - dec0)/24;
+        VHz[2] = test_hour(k, zone, t0, lat);
+        
+        RAn[0] = RAn[2];                       // advance to next hour
+        Dec[0] = Dec[2];
+        VHz[0] = VHz[2];
+    }
+
+    // display results
+    calc.sunrise.value = zintstr(Rise_time[0], 2) + ":" + zintstr(Rise_time[1], 2) 
+                       + ", az = " + frealstr(Rise_az, 5, 1) + "°";
+    calc.sunset.value  = zintstr( Set_time[0], 2) + ":" + zintstr( Set_time[1], 2)
+                       + ", az = " + frealstr(Set_az, 5, 1) + "°";
+    special_message();
+}
+
+// Local Sidereal Time for zone
+function lst( lon, jd, z )
+{
+    var s = 24110.5 + 8640184.812999999*jd/36525 + 86636.6*z + 86400*lon;
+    s = s/86400;
+    s = s - Math.floor(s);
+    return s*360*DR;
+}
+
+// test an hour for an event
+function test_hour( k, zone, t0, lat )
+{
+    var ha = new Array(3);
+    var a, b, c, d, e, s, z;
+    var hr, min, time;
+    var az, dz, hz, nz;
+    
+    ha[0] = t0 - RAn[0] + k*K1; 
+    ha[2] = t0 - RAn[2] + k*K1 + K1; 
+
+    ha[1]  = (ha[2]  + ha[0])/2;               // hour angle at half hour
+    Dec[1] = (Dec[2] + Dec[0])/2 ;             // declination at half hour
+    
+    s = Math.sin(lat*DR);
+    c = Math.cos(lat*DR);
+    z = Math.cos(90.833*DR);                   // refraction + sun semidiameter at horizon
+
+    if (k <= 0)
+        VHz[0] = s*Math.sin(Dec[0]) + c*Math.cos(Dec[0])*Math.cos(ha[0]) - z;
+
+    VHz[2] = s*Math.sin(Dec[2]) + c*Math.cos(Dec[2])*Math.cos(ha[2]) - z;
+    
+    if (sgn(VHz[0]) == sgn(VHz[2])) 
+        return VHz[2];                         // no event this hour
+    
+    VHz[1] = s*Math.sin(Dec[1]) + c*Math.cos(Dec[1])*Math.cos(ha[1]) - z;
+    
+    a =  2* VHz[0] - 4*VHz[1] + 2*VHz[2]; 
+    b = -3* VHz[0] + 4*VHz[1] - VHz[2];   
+    d = b*b - 4*a*VHz[0];
+
+    if (d < 0) 
+        return VHz[2];                         // no event this hour
+    
+    d = Math.sqrt(d);    
+    e = (-b + d)/(2 * a);
+    
+    if ((e > 1)||(e < 0))
+        e = (-b - d)/(2*a);
+
+    time = k + e + 1/120;                      // time of an event
+    
+    hr = Math.floor(time);
+    min = Math.floor((time - hr)*60);
+
+    hz = ha[0] + e*(ha[2] - ha[0]);            // azimuth of the sun at the event
+    nz = -Math.cos(Dec[1])*Math.sin(hz);
+    dz = c*Math.sin(Dec[1]) - s*Math.cos(Dec[1])*Math.cos(hz);
+    az = Math.atan2(nz, dz)/DR;
+    if (az < 0) az = az + 360;
+    
+    if ((VHz[0] < 0)&&(VHz[2] > 0))
+    {
+        Rise_time[0] = hr;
+        Rise_time[1] = min;
+        Rise_az = az;
+        Sunrise = true;
+    }
+    
+    if ((VHz[0] > 0)&&(VHz[2] < 0))
+    {
+        Set_time[0] = hr;
+        Set_time[1] = min;
+        Set_az = az;
+        Sunset = true;
+    }
+
+    return VHz[2];
+}
+
+// check for no sunrise and/or no sunset
+function special_message()
+{
+    if ((!Sunrise)&&(!Sunset))                 // neither sunrise nor sunset
+    {
+        if (VHz[2] < 0)
+            calc.sunrise.value = "Sun down all day";
+        else
+            calc.sunrise.value = "Sun up all day";
+
+        calc.sunset.value = "";
+    }
+    else                                       // sunrise or sunset
+    {
+        if (!Sunrise)
+            calc.sunrise.value = "No sunrise this date";
+        else if (!Sunset)
+            calc.sunset.value  = "No sunset this date";
+    }
+}
+
+// sun's position using fundamental arguments 
+// (Van Flandern & Pulkkinen, 1979)
+function sun( jd, ct )
+{
+    var g, lo, s, u, v, w;
+    
+    lo = 0.779072 + 0.00273790931*jd;
+    lo = lo - Math.floor(lo);
+    lo = lo*2*PI;
+
+    g = 0.993126 + 0.0027377785*jd;
+    g = g - Math.floor(g);
+    g = g*2*PI;
+    
+    v = 0.39785*Math.sin(lo);
+    v = v - 0.01*Math.sin(lo - g);
+    v = v + 0.00333*Math.sin(lo + g);
+    v = v - 0.00021*ct * Math.sin(lo);
+    
+    u = 1 - 0.03349*Math.cos(g);
+    u = u - 0.00014*Math.cos(2*lo);
+    u = u + 0.00008*Math.cos(lo);
+    
+    w = -0.0001 - 0.04129*Math.sin(2*lo);
+    w = w + 0.03211*Math.sin(g );
+    w = w + 0.00104*Math.sin(2*lo - g);
+    w = w - 0.00035*Math.sin(2*lo + g);
+    w = w - 0.00008*ct*Math.sin(g);
+    
+    s = w/Math.sqrt(u - v*v);                  // compute sun's right ascension  
+    Sky[0] = lo + Math.atan(s/Math.sqrt(1 - s*s));
+
+    s = v/Math.sqrt(u);                        // ...and declination 
+    Sky[1] = Math.atan(s/Math.sqrt(1 - s*s));
+}
+
+// determine Julian day from calendar date
+// (Jean Meeus, "Astronomical Algorithms", Willmann-Bell, 1991)
+function julian_day()
+{
+    var a, b, jd;
+    var gregorian;
+
+    var month = Now.getMonth() + 1;
+    var day   = Now.getDate();
+    var year  = Now.getFullYear();
+
+    gregorian = (year < 1583) ? false : true;
+    
+    if ((month == 1)||(month == 2))
+    {
+        year  = year  - 1;
+        month = month + 12;
+    }
+
+    a = Math.floor(year/100);
+    if (gregorian) b = 2 - a + Math.floor(a/4);
+    else           b = 0.0;
+
+    jd = Math.floor(365.25*(year + 4716)) 
+       + Math.floor(30.6001*(month + 1)) 
+       + day + b - 1524.5;
+    
+    return jd;
+}
+
+// returns value for sign of argument
+function sgn( x )
+{
+    var rv;
+    if (x > 0.0)      rv =  1;
+    else if (x < 0.0) rv = -1;
+    else              rv =  0;
+    return rv;
+}
+
+// format a positive integer with leading zeroes
+function zintstr( num, width )
+{
+    var str = num.toString(10);
+    var len = str.length;
+    var intgr = "";
+    var i;
+
+    for (i = 0; i < width - len; i++)          // append leading zeroes
+        intgr += '0';
+
+    for (i = 0; i < len; i++)                  // append digits
+        intgr += str.charAt(i);
+
+    return intgr;
+}
+
+// format an integer
+function cintstr( num, width )
+{
+    var str = num.toString(10);
+    var len = str.length;
+    var intgr = "";
+    var i;
+
+    for (i = 0; i < width - len; i++)          // append leading spaces
+        intgr += ' ';
+
+    for (i = 0; i < len; i++)                  // append digits
+        intgr += str.charAt(i);
+
+    return intgr;
+}
+
+// format a real number
+function frealstr( num, width, fract )
+{
+    var str = num.toFixed(fract);
+    var len = str.length;
+    var real = "";
+    var i;
+
+    for (i = 0; i < width - len; i++)          // append leading spaces
+        real += ' ';
+
+    for (i = 0; i < len; i++)                  // append digits
+        real += str.charAt(i);
+
+    return real;
+}
+
+// read data from cookie
+function getCookie( name )
+{
+    if (document.cookie.length > 0) 
+    { 
+        begin = document.cookie.indexOf(name+"="); 
+        if (begin != -1) // Note: != means "is not equal to"
+        { 
+            begin += name.length + 1; 
+            end = document.cookie.indexOf(";", begin);
+            if (end == -1) end = document.cookie.length;
+
+            return unescape(document.cookie.substring(begin, end)); 
+        } 
+    }
+    return null; 
+}
+
+// write data to cookie
+function setCookie( name, value, expiredays ) 
+{
+    var ExpireDate = new Date();
+    ExpireDate.setTime(ExpireDate.getTime() + (expiredays*24*3600*1000));
+
+    document.cookie = name 
+                    + "=" + escape(value) 
+                    + ((expiredays == null) ? "" : "; expires=" + ExpireDate.toGMTString());
+}
+
+// unhide -->
+</script>
+</head>
+<body onLoad="initdate();">
+
+<!--[TOP]-->
+<center>
+<!-- google -->
+<script type="text/javascript"><!--
+google_ad_client = "pub-8195248024094868";
+google_ad_width = 728;
+google_ad_height = 90;
+google_ad_format = "728x90_as";
+google_ad_channel ="";
+//--></script>
+<script type="text/javascript"
+  src="http://pagead2.googlesyndication.com/pagead/show_ads.js">
+</script>
+<!-- google -->
+</center>
+<!--[END]-->
+
+<hr>
+|<A href="index.html"> home </A>
+|<A href="scriptindex.html"> contents </A>
+|<A onclick=feedback() href="#top"> send comment </A>
+|<A onclick=send_to() href="#top"> send link </A>
+|<A onclick=bookmark() href="#top"> add bookmark </A>| 
+<hr>
+
+<h2>Sunrise, Sunset solver</h2>
+<h3>version 2</h3>
+<h4><I>by Stephen R. Schmitt</I></h4>
+
+<center>
+<form name=calc>
+<table border=1 cellspacing=0 bordercolor=darkblue frame=border rules=rows>
+<caption>Enter your location:</caption>
+<tr><td>latitude
+    <td><INPUT size=10 maxLength=20 name=lat_degrees>
+    <td align=left><b>&deg; </b></td>
+    <td><INPUT size=10 maxLength=20 name=lat_minutes>
+    <td align=left><b>' </b></td>
+    <td><input type="radio" name ="north" onClick="north_lat();" checked>North
+    <td><input type="radio" name ="south" onClick="south_lat();">South
+<tr><td>longitude
+    <td><INPUT size=10 maxLength=20 name=lon_degrees>
+    <td align=left><b>&deg; </b></td>
+    <td><INPUT size=10 maxLength=20 name=lon_minutes>
+    <td align=left><b>' </b></td>
+    <td><input type="radio" name ="east" onClick="east_lon();">East
+    <td><input type="radio" name ="west" onClick="west_lon();" checked>West
+</table>
+<table border=1 cellspacing=0 bordercolor=darkblue frame=border rules=rows>
+<caption>Enter the date:<br> <tt>mm/dd/yyyy</caption>
+<tr><td><INPUT size=2 maxLength=10 name=month><td><b> / </b></td>
+    <td><INPUT size=2 maxLength=10 name=day><td><b> / </b></td>
+    <td><INPUT size=5 maxLength=10 name=year><td><b>&nbsp;&nbsp;&nbsp;&nbsp;</b></td>
+</table>
+<p>
+<INPUT onclick=compute(); type=button STYLE="font-family:Courier" value="Compute">
+<INPUT onclick=test();    type=button STYLE="font-family:Courier" value=" Test  ">
+<p>
+<table border=1 cellspacing=0 bordercolor=darkblue frame=border rules=rows>
+<caption>Solution:</caption>
+<tr><td>Sunrise
+    <td><INPUT readOnly size=20 maxLength=20 name=sunrise>
+<tr><td>Sunset
+    <td><INPUT readOnly size=20 maxLength=20 name=sunset>
+</table>
+</form>
+</center>
+<hr>
+
+<h3><A name=contents>Contents</A></h3>
+<ol>
+<li><A href="#about">About</A>
+<li><A href="#the source code">The source code</A>
+<li><A href="#discussion">Discussion</A>
+</ol>
+<hr>
+<h4>1. <A name=about>About</A></h4>
+<p>
+This Java Script calculator determines the time of sunrise and sunset for your location and a given date. 
+To operate the calculator, enter your latitude and longitude. Press the <B>Compute</B> button 
+to obtain the solution. The <B>Test</B> button loads the geographic coordinates of Boston, Massachusetts, 
+USA to demonstrate how the calculator works. On invalid entries, a popup window will display an 
+error message. 
+<p>
+Return to <A href="#contents">Contents</A> 
+<hr>
+
+<h4>2. <A name="the source code">The source code</A></h4>
+<p>
+The Java Script source code for this program can be viewed by using the 
+<b>View|Source</b> command of your web browser. 
+<p>
+You may use or modify this source code in any way you find useful, provided 
+that you agree that the author has no warranty, obligations or liability. You 
+must determine the suitability of this source code for your use. 
+<p>
+Return to <A href="#contents">Contents</A> 
+<hr>
+
+<h4>3. <A name=discussion>Discussion</A></h4>
+<p>
+This page calculates the times of sunrise and sunset on any date, accurate to the minute within 
+several centuries of the present. It correctly describes what happens in the Arctic and Antarctic 
+regions, where the Sun may not rise or set on a given date. The program was adapted from a BASIC 
+program in Sky & Telescope magazine, August 1994, page 84,
+<p>
+Sunrise occurs when the rotation of the Earth causes the upper limb of the Sun to move above the 
+visible horizon as seen by an observer on the Earth's surface. Sunset is similar, occurring when the 
+upper limb of the Sun moves below the visible horizon. The mathematical model of the Sun's apparent 
+motion in the sky gives the position of the center of the Sun as it would be seen from the center of 
+the Earth. Because the Sun is very distant from the Earth, it is not necessary to correct for 
+parallax, the angular offset due observation from the Earth's surface. However, it is necessary to 
+account for the visual radius of the Sun since the position of the upper limb determines sunset and 
+sunrise. Additionally, the Earth's atmosphere refracts light noticeably for light source near the 
+horizon. This calculator includes corrections that account for both of these under average 
+conditions. Actual observations of sunset and sunrise may differ from the predicted times due to 
+variations in atmospheric conditions and due to local topography.
+<p>
+The predicted times are given in local time, standard or daylight saving, obtained from your 
+computer's operating system. The azimuth of sunrise and sunset is given, measured in degrees from 
+true North. You must determine your correct latitude and longitude to obtain valid predictions for 
+your location. A good on-line source for this information is 
+<a href="http://skyandtelescope.com/">Sky & Telescope</a>.
+<p>
+<h3>References</h3>
+<ol>
+<li><A HREF="http://www.amazon.com/gp/associates/link-types/marketplace.html?t=topicsincompu-20&asin=0943396611">Astronomical Algorithms, Meeus</A>
+<li><A HREF="http://www.amazon.com/gp/associates/link-types/marketplace.html?t=topicsincompu-20&asin=0521356997">Practical Astronomy with your Calculator</A>
+</ol>
+<p>
+Return to <A href="#contents">Contents</A> 
+<hr>
+
+<!--[BOTTOM]-->
+<center>
+<!-- google -->
+<script type="text/javascript"><!--
+google_ad_client = "pub-8195248024094868";
+google_ad_width = 728;
+google_ad_height = 90;
+google_ad_format = "728x90_as";
+google_ad_channel ="";
+//--></script>
+<script type="text/javascript"
+  src="http://pagead2.googlesyndication.com/pagead/show_ads.js">
+</script>
+<!-- google -->
+</center>
+<!--[END]-->
+<p align=center><a href="http://www.abcd-classics.com">AbCd Classics - free on-line books</a>
+<hr>
+Copyright &copy; 2007, Stephen R. Schmitt
+</body>
+</html>
