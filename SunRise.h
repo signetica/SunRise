@@ -12,11 +12,6 @@
 
 #define SR_WINDOW   48	    // Even integer
 
-struct sunCoordinates {
-    double RA;		    // Right ascension
-    double declination;	    // Declination
-};
-
 class SunRise {
   public:
     time_t queryTime = 0;
@@ -28,12 +23,12 @@ class SunRise {
     bool hasSet = false;
     bool isVisible = false;
 
-    SunRise(double latitude, double longitude, time_t t);
+    void calculate(double latitude, double longitude, time_t t);
 
   private:
     void testSunRiseSet(int i, double offsetDays, double latitude, double longitude,
-			 struct sunCoordinates *mp);
-    struct sunCoordinates sun(double dayOffset);
+			 struct skyCoordinates *mp);
+    struct skyCoordinates sun(double dayOffset);
     double interpolate(double f0, double f1, double f2, double p);
     double julianDate(time_t t);
     double localSiderealTime(double offsetDays, double longitude);

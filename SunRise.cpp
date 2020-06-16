@@ -29,6 +29,11 @@
 
 #define K1 15*(M_PI/180)*1.0027379
 
+struct skyCoordinates {
+    double RA;		    // Right ascension
+    double declination;	    // Declination
+};
+
 // Determine the nearest sun rise or set event previous, and the nearest
 // sun rise or set event subsequent, to the specified time in seconds since the
 // Unix epoch (January 1, 1970) and at the specified latitude and longitude in
@@ -36,8 +41,9 @@
 //
 // We look for events from SR_WINDOW/2 hours in the past to SR_WINDOW/2 hours
 // in the future.
-SunRise::SunRise(double latitude, double longitude, time_t t) {
-  sunCoordinates sunPosition[3];
+void
+SunRise::calculate(double latitude, double longitude, time_t t) {
+  skyCoordinates sunPosition[3];
   double offsetDays;
 
   queryTime = t;
@@ -58,7 +64,7 @@ SunRise::SunRise(double latitude, double longitude, time_t t) {
     sunPosition[2].RA += 2 * M_PI;
 
   // Initialize interpolation array.
-  sunCoordinates spWindow[3];
+  skyCoordinates spWindow[3];
   spWindow[0].RA  = sunPosition[0].RA;
   spWindow[0].declination = sunPosition[0].declination;
 
@@ -82,7 +88,7 @@ SunRise::SunRise(double latitude, double longitude, time_t t) {
 // Look for sun rise or set events during an hour.
 void
 SunRise::testSunRiseSet(int k, double offsetDays, double latitude, double longitude,
-			sunCoordinates *sp) {
+			skyCoordinates *sp) {
   double ha[3], VHz[3];
   double lSideTime;
 
@@ -197,7 +203,7 @@ noevent:
 
 // Sun position using fundamental arguments
 // (Van Flandern & Pulkkinen, 1979)
-sunCoordinates
+skyCoordinates
 SunRise::sun(double dayOffset) {
   double centuryOffset = dayOffset / 36525 + 1;	      // Centuries from 1900.0
 
@@ -226,7 +232,7 @@ SunRise::sun(double dayOffset) {
      - 0.00008 * centuryOffset * sin(g);
     
   double s;
-  sunCoordinates sc;
+  skyCoordinates sc;
   s = w / sqrt(u - v*v);			    // Right ascension  
   sc.RA = l + atan(s / sqrt(1 - s*s));
 

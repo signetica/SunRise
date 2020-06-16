@@ -36,7 +36,8 @@ To use the SunRise library, include SunRise.h
 	#include <SunRise.h>
 
 ### Detailed synopsis
-	SunRise sr(double latitude, double longitude, time_t time);
+	SunRise sr;
+	sr.calculate(double latitude, double longitude, time_t time);
 
 #### Arguments
 	latitude, longitude:
