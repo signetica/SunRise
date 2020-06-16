@@ -24,7 +24,6 @@
 // Redistributions of this source code must retain this copyright notice.
 
 #include <math.h>
-#include <time.h>
 #include "SunRise.h"
 
 #define K1 15*(M_PI/180)*1.0027379
