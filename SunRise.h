@@ -14,14 +14,14 @@
 
 class SunRise {
   public:
-    time_t queryTime = 0;
-    time_t riseTime = 0;
-    time_t setTime = 0;
-    float riseAz = 0;
-    float setAz = 0;
-    bool hasRise = false;
-    bool hasSet = false;
-    bool isVisible = false;
+    time_t queryTime;
+    time_t riseTime;
+    time_t setTime;
+    float riseAz;
+    float setAz;
+    bool hasRisee;
+    bool hasSet;
+    bool isVisible;
 
     void calculate(double latitude, double longitude, time_t t);
 

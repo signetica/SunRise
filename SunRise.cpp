@@ -258,6 +258,10 @@ SunRise::julianDate(time_t t) {
 #if __ISO_C_VISIBLE < 1999
 // Arduino compiler is missing this function as of 6/2020.
 #define remainder(x, y) ((double)((double)x - (double)y * rint((double)x / (double)y)))
+
+// double remainder(double x, double y) {
+//   return(x - (y * rint(x / y)));
+// }
 #endif
 
 // Local Sidereal Time
