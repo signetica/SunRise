@@ -29,8 +29,8 @@
 #define K1 15*(M_PI/180)*1.0027379
 
 struct skyCoordinates {
-    double RA;		    // Right ascension
-    double declination;	    // Declination
+  double RA;		    // Right ascension
+  double declination;	    // Declination
 };
 
 // Initialize the class.
