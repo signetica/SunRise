@@ -23,6 +23,7 @@ class SunRise {
     bool hasSet;
     bool isVisible;
 
+    SunRise();
     void calculate(double latitude, double longitude, time_t t);
 
   private:

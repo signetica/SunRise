@@ -33,6 +33,18 @@ struct skyCoordinates {
     double declination;	    // Declination
 };
 
+// Initialize the class.
+SunRise::SunRise() {
+  queryTime = 0;
+  riseTime = 0;
+  setTime = 0;
+  riseAz = 0;
+  setAz = 0;
+  hasRise = false;
+  hasSet = false;
+  isVisible = false;
+}
+
 // Determine the nearest sun rise or set event previous, and the nearest
 // sun rise or set event subsequent, to the specified time in seconds since the
 // Unix epoch (January 1, 1970) and at the specified latitude and longitude in
