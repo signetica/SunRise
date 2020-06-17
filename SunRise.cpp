@@ -33,18 +33,6 @@ struct skyCoordinates {
   double declination;	    // Declination
 };
 
-// Initialize the class.
-SunRise::SunRise() {
-  queryTime = 0;
-  riseTime = 0;
-  setTime = 0;
-  riseAz = 0;
-  setAz = 0;
-  hasRise = false;
-  hasSet = false;
-  isVisible = false;
-}
-
 // Determine the nearest sun rise or set event previous, and the nearest
 // sun rise or set event subsequent, to the specified time in seconds since the
 // Unix epoch (January 1, 1970) and at the specified latitude and longitude in
@@ -57,6 +45,7 @@ SunRise::calculate(double latitude, double longitude, time_t t) {
   skyCoordinates sunPosition[3];
   double offsetDays;
 
+  initClass();
   queryTime = t;
   offsetDays = julianDate(t) - 2451545L;     // Days since Jan 1, 2000, 1200UTC.
   // Begin testing (SR_WINDOW / 2) hours before requested time.
@@ -291,4 +280,17 @@ SunRise::localSiderealTime(double offsetDays, double longitude) {
   lSideTime -= floor(lSideTime);
   lSideTime *= 360;			  // Convert to degrees.
   return(lSideTime);
+}
+
+// Class initialization.
+void
+SunRise::initClass() {
+  queryTime = 0;
+  riseTime = 0;
+  setTime = 0;
+  riseAz = 0;
+  setAz = 0;
+  hasRise = false;
+  hasSet = false;
+  isVisible = false;
 }
