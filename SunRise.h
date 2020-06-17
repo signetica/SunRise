@@ -19,7 +19,7 @@ class SunRise {
     time_t setTime;
     float riseAz;
     float setAz;
-    bool hasRisee;
+    bool hasRise;
     bool hasSet;
     bool isVisible;
 
