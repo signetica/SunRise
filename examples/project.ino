@@ -17,6 +17,16 @@ setup() {
   // For many purposes you can just ignore the entire timezone issue and just use
   // local time.  But for astronomical purposes you must reference a standard time.
 
+  // You will need to calculate the offset between your local time zone and UTC.
+  // A simple technique that will always work is to assign the value directly
+  // after looking it up:
+  // time_t utcOffset = 5 * 60 * 60; // US Eastern Standard time (EST)
+
+  // If your board supports some of the POSIX interfaces such as setenv()
+  // the following technique will let you calculate the offset from the
+  // name of the POSIX timezone.  It has the advantage of correctly adjusting
+  // for daylight savings/summer time:
+
   // First, set the timezone (for a full list see:
   //	https://github.com/nayarsystems/posix_tz_db/blob/master/zones.csv)
   // Do this before you set the time with setTime().
