@@ -78,7 +78,7 @@ SunRise::calculate(double latitude, double longitude, time_t t) {
 					  sunPosition[1].declination,
 					  sunPosition[2].declination, ph);
 
-    // Look for moonrise/set events during this interval.
+    // Look for sunrise/set events during this interval.
     testSunRiseSet(k, offsetDays, latitude, longitude, spWindow);
 
     spWindow[0] = spWindow[2];		    // Advance to next interval.
@@ -137,7 +137,7 @@ SunRise::testSunRiseSet(int k, double offsetDays, double latitude, double longit
   eventTime = queryTime + (time - SR_WINDOW / 2) *60 *60;
 
   double hz, nz, dz, az;
-  hz = ha[0] + e * (ha[2] - ha[0]);	    // Azimuth of the moon at the event.
+  hz = ha[0] + e * (ha[2] - ha[0]);	    // Azimuth of the sun at the event.
   nz = -cos(sp[1].declination) * sin(hz);
   dz = c * sin(sp[1].declination) - s * cos(sp[1].declination) * cos(hz);
   az = atan2(nz, dz) / (M_PI / 180);
