@@ -16,8 +16,14 @@ of the solar position three times, at the beginning, middle, and end of the
 period of interest.  Three point interpolation is used to predict the position
 for each hour, and the arithmetic mean is used to predict the half-hour positions.
 
-The full computational burden is negligible on modern computers, but the
-algorithm is effective and still useful for small embedded systems.
+Rise and set events are found by checking if the sun has crossed the horizon
+at hourly intervals.  The time of the crossing then is determined by
+interpolating between the calculated positions.  In polar regions during
+periods when the solar day or night is shorter than an hour, sunrise or set
+events may be missed.
+
+The algorithm's full computational burden is negligible on modern computers,
+but it is effective and still useful for small embedded systems.
 
 While the number of calculations is manageable on small systems, it is unlikely that
 accurate results will be produced on systems with four-byte double precision floats
