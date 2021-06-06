@@ -25,10 +25,10 @@ events may be missed.
 The algorithm's full computational burden is negligible on modern computers,
 but it is effective and still useful for small embedded systems.
 
-While the number of calculations is manageable on small systems, it is unlikely that
-accurate results will be produced on systems with four-byte double precision floats
-(such as the older Arduinos).  Satisfactory results will be had on newer processors
-such as the ESP8266.
+While the number of calculations is manageable on small systems, it is
+unlikely that accurate results will be produced on systems with four-byte
+double precision floats (such as the older Arduinos using ATmega processors).
+Satisfactory results will be had on newer processors such as the ESP8266.
 
 ## Historical background
 This software was originally adapted to javascript by Stephen R. Schmitt
