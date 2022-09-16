@@ -164,7 +164,7 @@ SunRise::testSunRiseSet(int k, double offsetDays, double latitude, double longit
   if ((VHz[0] < 0) && (VHz[2] > 0)) {
     if (!hasRise ||
 	((riseTime < queryTime) == (eventTime < queryTime) &&
-	 labs(riseTime - queryTime) > labs(eventTime - queryTime)) ||
+	 labs((long)(riseTime - queryTime)) > labs((long)(eventTime - queryTime))) ||
 	((riseTime < queryTime) != (eventTime < queryTime) &&
 	 (hasSet && 
 	  (riseTime < queryTime) == (setTime < queryTime)))) {
@@ -176,7 +176,7 @@ SunRise::testSunRiseSet(int k, double offsetDays, double latitude, double longit
   if ((VHz[0] > 0) && (VHz[2] < 0)) {
     if (!hasSet ||
 	((setTime < queryTime) == (eventTime < queryTime) &&
-	 labs(setTime - queryTime) > labs(eventTime - queryTime)) ||
+	 labs((long)(setTime - queryTime)) > labs((long)(eventTime - queryTime))) ||
 	((setTime < queryTime) != (eventTime < queryTime) &&
 	 (hasRise && 
 	  (setTime < queryTime) == (riseTime < queryTime)))) {
