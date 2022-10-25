@@ -41,7 +41,7 @@ main(int argc, char *argv[]) {
 #define utcOffset 0
 #endif
 
-  // Find the last and next lunar set and rise.  The utcOffset is only for Arduino.
+  // Find the last and next sun set and rise.  The utcOffset is only for Arduino.
   SunRise sr;
   sr.calculate(latitude, longitude, t + utcOffset);
 
