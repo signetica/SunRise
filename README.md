@@ -35,15 +35,20 @@ This software was originally adapted to javascript by Stephen R. Schmitt
 from a BASIC program from the 'Astronomical Computing' column of Sky & Telescope,
 April 1994, page 84, written by Roger W. Sinnott.
 
-## Usage
-
-To use the SunRise library, include SunRise.h
-	
-	#include <SunRise.h>
-
-### Detailed synopsis
-	SunRise sr;
-	sr.calculate(double latitude, double longitude, time_t time);
+## Installation and Usage
+1. Clone the repository by *SSH*:
+```bash
+git clone git@github.com:signetica/SunRise.git
+```
+2. Include the `SunRise.h` files in your project.
+```c++
+#include <SunRise.h>
+```
+3. Create an instance of the `SunRise` class and call the `calculate` method to calculate the sun rise/set events.
+```c++
+SunRise sr;
+sr.calculate(double latitude, double longitude, time_t time);
+```
 
 #### Arguments
 	latitude, longitude:
@@ -77,3 +82,9 @@ To use the SunRise library, include SunRise.h
 	time_t sr.riseTime;	// The sun rise event, in UTC seconds from the Unix epoch.
 
 	time_t sr.setTime;	// The sun set event.
+
+## Web Interface
+
+In addition to the C++ library, a web interface is also provided for calculating sun rise/set events. You can access this interface by opening the `reference/script_sun_rise_set2.html` file located in same folder that this documentation.
+
+Please note that the web interface requires a modern web browser with JavaScript enabled.
