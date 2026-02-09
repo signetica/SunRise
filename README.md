@@ -30,10 +30,18 @@ unlikely that accurate results will be produced on systems with four-byte
 double precision floats (such as the older Arduinos using ATmega processors).
 Satisfactory results will be had on newer processors such as the ESP8266.
 
+The solar postions, based upon T.C. Van Flandern and K.F. Pulkkinen's 1979 paper,
+are accurate to within 1' for times within 300 years of 1979.  This class uses
+the Unix epoch as an input parameter, and is therefore constrained as written
+to find events after January 1, 1970.
+
 ## Historical background
 This software was originally adapted to javascript by Stephen R. Schmitt
 from a BASIC program from the 'Astronomical Computing' column of Sky & Telescope,
-April 1994, page 84, written by Roger W. Sinnott.
+August 1994, page 84, written by Roger W. Sinnott.  This latter program based
+its calculations of the Sun's position upon T.C. Van Flandern
+and K.F. Pulkkinen's 1979 paper "Low-Precision Formulae for Planetary Positions".
+All three references are included in the references subdirectory of this repository.
 
 ## Usage
 
